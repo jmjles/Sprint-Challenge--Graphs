@@ -4,6 +4,7 @@ from world import World
 
 import random
 from util import Queue
+from util import Stack
 from ast import literal_eval
 
 # Load world
@@ -11,11 +12,11 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
+# map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -36,50 +37,44 @@ player = Player(world.starting_room)
 
 traversal_path = []
 rooms = {}
+reversed = []
 opposite = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
+#init first room
 # While rooms are undescovered
-    # Walk north untill you hit a dead end
-    # For prev room
-        # set current room to that path
-    # If room has unmarked exits
-        # Go through it and mark it on the map
-        # Come back to original room
-        # If there are no more rooms unmarked
-            # Set complete to true
-while len(rooms)  < len(room_graph):
+    # if in undescovered room
+        # Add room to rooms with it's exits, array
+        # get prev move
+        # remove prev move (opposite) from current room
+    # if all exits are descovered
+        # get last move
+        # move to last room
+        # continue till room with undescovered room
+# init room
+rooms[player.current_room.id] = player.current_room.get_exits()
+
+while len(rooms)  < len(room_graph) - 1:
     exits = player.current_room.get_exits()
     current = player.current_room.id
-    for direction in exits:
-        rooms[current] = {direction: '?'}
-    past = current
-    for direction in rooms[current]:
-        if rooms[current][direction] == '?':
-            while rooms[player.current_room.id]
-            player.travel(direction)
-            traversal_path.append(direction)
-            rooms[past][direction] = current
 
-            player.travel(opposite[direction])
-            traversal_path.append(opposite[direction])
+    if current not in rooms:
 
-    
+        rooms[player.current_room.id] = exits
+        last = reversed[-1]
+        rooms[current].remove(last)
 
-def bfs(start):
-    q = Queue()
-    q.enqueue([start])
-    visited = set()
-    while q.size() > 0:
-        v = q.dequeue()
-        last = v[-1]
-        if last not in visited:
-            if last == '?':
-                return v
-            visited.add(last)
-            for neighbor in rooms[current]:
-                copy_path = v.copy()
-                copy_path.append(neighbor)
-                q.enqueue(copy_path)
+    while len(rooms[current]) == 0:
+        direction = reversed.pop()
+        traversal_path.append(direction)
+        player.travel(direction)
+
+        current = player.current_room.id
+
+    direction = rooms[current].pop()
+    traversal_path.append(direction)
+
+    reversed.append(opposite[direction])
+    player.travel(direction)
 
 # TRAVERSAL TEST - DO NOT MODIFY
 visited_rooms = set()
